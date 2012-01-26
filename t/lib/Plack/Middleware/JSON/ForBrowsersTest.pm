@@ -7,15 +7,19 @@ use warnings;
 use Test::More;
 use Plack::Test;
 use Plack::Util;
-
 use HTTP::Request::Common;
 
-my $app = Plack::Util::load_psgi('examples/app.psgi');
+
+sub startup : Test(startup) {
+	my ($self) = @_;
+	$self->{app} = Plack::Util::load_psgi('examples/app.psgi');
+}
+
 
 sub basic_test : Test(6) {
 	my ($self) = @_;
 
-	test_psgi $app, sub {
+	test_psgi $self->{app}, sub {
 		my ($cb) = @_;
 
 		my $res = $cb->(GET "/json");

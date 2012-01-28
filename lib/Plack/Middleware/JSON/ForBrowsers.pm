@@ -100,8 +100,8 @@ sub call {
 		my ($cb_res) = @_;
 
 		my $h = Plack::Util::headers($cb_res->[1]);
-		# Ignore stuff like '; charset=utf-8'
-		if (any { $_ eq substr($h->get('Content-Type'), 0, length($_)) } @json_types) {
+		# Ignore stuff like '; charset=utf-8' for now
+		if (any { index($h->get('Content-Type'), $_) >= 0 } @json_types) {
 			$h->set('Content-Type' => 'text/html; charset=utf-8');
 
 			my $json = '';

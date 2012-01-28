@@ -92,8 +92,7 @@ sub call {
 	my $res = $self->app->($env);
 
 	# Don't wrap response to Ajax call
-	if (defined $env->{HTTP_X_REQUESTED_WITH}
-			&& $env->{HTTP_X_REQUESTED_WITH} eq 'XMLHttpRequest') {
+	unless ($self->looks_like_browser_request($env)) {
 		return $res
 	}
 
@@ -128,6 +127,46 @@ sub call {
 		}
 		return;
 	});
+}
+
+
+=method looks_like_browser_request
+
+Try to decide if a request is coming from a browser. Uses the C<Accept> and
+C<X-Requested-With> headers for this decision.
+
+=head3 Parameters
+
+This method expects positional parameters.
+
+=over
+
+=item env
+
+The L<Plack> environment.
+
+=back
+
+=head3 Result
+
+C<1> if it looks like the request came from a browser, C<0> otherwise.
+
+=cut
+
+sub looks_like_browser_request {
+	my ($self, $env) = @_;
+
+	if (defined $env->{HTTP_X_REQUESTED_WITH}
+			&& $env->{HTTP_X_REQUESTED_WITH} eq 'XMLHttpRequest') {
+		return 0;
+	}
+
+	if (defined $env->{HTTP_ACCEPT}
+			&& any { index($env->{HTTP_ACCEPT}, $_) >= 0 } qw(text/html application/xhtml+xml)) {
+		return 1;
+	}
+
+	return 0;
 }
 
 1;

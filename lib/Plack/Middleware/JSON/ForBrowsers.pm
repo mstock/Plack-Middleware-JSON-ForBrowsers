@@ -41,9 +41,15 @@ chomp(my $html_head = <<'EOHTML');
 		<title>JSON::ForBrowsers</title>
 		<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
 		<style type="text/css">
+			html, body {
+				padding: 0px;
+				margin: 0px;
+			}
 			pre {
 				background-color: #FAFAFA;
 				border: 1px solid #E9E9E9;
+				padding: 4px;
+				margin: 12px;
 			}
 		</style>
 	</head>

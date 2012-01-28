@@ -33,7 +33,7 @@ a C<application/json> response with HTML and adapt the content type accordingly.
 
 =cut
 
-my $html_head = <<'EOHTML';
+chomp(my $html_head = <<'EOHTML');
 <?xml version="1.0"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -51,7 +51,7 @@ my $html_head = <<'EOHTML';
 		<pre><code>
 EOHTML
 
-my $html_foot = <<'EOHTML';
+(my $html_foot = <<'EOHTML') =~ s/^\s+//x;
 		</code></pre>
 	</body>
 </html>

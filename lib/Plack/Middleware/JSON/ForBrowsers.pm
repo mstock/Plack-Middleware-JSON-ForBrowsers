@@ -13,6 +13,8 @@ use List::MoreUtils qw(any);
 
 =head1 SYNOPSIS
 
+Basic Usage:
+
 	use Plack::Builder;
 
 	builder {
@@ -20,16 +22,32 @@ use List::MoreUtils qw(any);
 		$app;
 	};
 
+Combined with L<Plack::Middleware::Debug|Plack::Middleware::Debug>:
+
+	use Plack::Builder;
+
+	builder {
+		enable 'Debug';
+		enable 'JSON::ForBrowsers';
+		$app;
+	};
+
 =head1 DESCRIPTION
 
-Plack::Middleware::JSON::ForBrowsers does turn C<application/json> responses
+Plack::Middleware::JSON::ForBrowsers turns C<application/json> responses
 into HTML that can be displayed in the web browser. This is primarily intended
 as a development tool, especially for use with
 L<Plack::Middleware::Debug|Plack::Middleware::Debug>.
 
 The middleware checks the request for the C<X-Requested-With> header - if it
-does not exist or its value is not C<XMLHttpRequest>, it will wrap the JSON from
-a C<application/json> response with HTML and adapt the content type accordingly.
+does not exist or its value is not C<XMLHttpRequest> and the C<Accept> header
+indicates that HTML is acceptable, it will wrap the JSON from an C<application/json>
+response with HTML and adapt the content type accordingly.
+
+This behaviour should not break clients which expect JSON, as they still I<do>
+get JSON. But when the same URI is requested with a web browser, HTML-wrapped
+and pretty-printed JSON will be returned, which can be displayed without external
+programs or special extensions.
 
 =cut
 
@@ -82,7 +100,8 @@ sub new {
 
 =method call
 
-Specialized C<call> method.
+Specialized C<call> method. Expects the response body to contain a UTF-8 encoded
+byte string.
 
 =cut
 
@@ -91,7 +110,6 @@ sub call {
 
 	my $res = $self->app->($env);
 
-	# Don't wrap response to Ajax call
 	unless ($self->looks_like_browser_request($env)) {
 		return $res
 	}
@@ -132,8 +150,8 @@ sub call {
 
 =method looks_like_browser_request
 
-Try to decide if a request is coming from a browser. Uses the C<Accept> and
-C<X-Requested-With> headers for this decision.
+Tries to decide if a request is coming from a web browser. Uses the C<Accept>
+and C<X-Requested-With> headers for this decision.
 
 =head3 Parameters
 
@@ -171,3 +189,18 @@ sub looks_like_browser_request {
 
 1;
 
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+L<Plack::Middleware|Plack::Middleware>
+
+=item *
+
+L<Plack::Middleware::Debug|Plack::Middleware::Debug>
+
+=back
+
+=cut

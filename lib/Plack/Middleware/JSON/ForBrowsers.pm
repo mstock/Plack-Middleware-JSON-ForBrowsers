@@ -10,6 +10,8 @@ use JSON;
 use MRO::Compat;
 use Plack::Util::Accessor qw(json);
 use List::MoreUtils qw(any);
+use Encode;
+use HTML::Entities qw(encode_entities_numeric);
 
 =head1 SYNOPSIS
 
@@ -118,7 +120,7 @@ sub call {
 		my ($cb_res) = @_;
 
 		my $h = Plack::Util::headers($cb_res->[1]);
-		# Ignore stuff like '; charset=utf-8' for now
+		# Ignore stuff like '; charset=utf-8' for now, just assume UTF-8 input
 		if (any { index($h->get('Content-Type'), $_) >= 0 } @json_types) {
 			$h->set('Content-Type' => 'text/html; charset=utf-8');
 
@@ -135,10 +137,7 @@ sub call {
 					}
 					else {
 						$seen_last = 1;
-						my $pretty_json = $self->json()->encode(
-							$self->json()->decode($json)
-						);
-						return $html_head.$pretty_json.$html_foot;
+						return $self->json_to_html($json);
 					}
 				}
 			};
@@ -186,6 +185,46 @@ sub looks_like_browser_request {
 
 	return 0;
 }
+
+
+=method json_to_html
+
+Takes a UTF-8 encoded JSON byte string as input and turns it into a UTF-8
+encoded HTML byte string, with HTML entity encoded characters to avoid XSS.
+
+=head3 Parameters
+
+This method expects positional parameters.
+
+=over
+
+=item json
+
+The JSON byte string.
+
+=back
+
+=head3 Result
+
+The JSON wrapped in HTML.
+
+=cut
+
+sub json_to_html {
+	my ($self, $json) = @_;
+
+	my $pretty_json_string = decode(
+		'UTF-8',
+		$self->json()->encode(
+			$self->json()->decode($json)
+		)
+	);
+	return encode(
+		'UTF-8',
+		$html_head.encode_entities_numeric($pretty_json_string).$html_foot
+	);
+}
+
 
 1;
 

@@ -84,6 +84,8 @@ EOHTML
 EOHTML
 
 my @json_types = qw(application/json);
+my @html_types = qw(text/html application/xhtml+xml);
+
 
 =method new
 
@@ -179,7 +181,7 @@ sub looks_like_browser_request {
 	}
 
 	if (defined $env->{HTTP_ACCEPT}
-			&& any { index($env->{HTTP_ACCEPT}, $_) >= 0 } qw(text/html application/xhtml+xml)) {
+			&& any { index($env->{HTTP_ACCEPT}, $_) >= 0 } @html_types) {
 		return 1;
 	}
 

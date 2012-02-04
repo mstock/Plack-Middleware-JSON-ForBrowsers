@@ -89,7 +89,7 @@ my @html_types = qw(text/html application/xhtml+xml);
 
 =method new
 
-Constructor, creates new instance.
+Constructor, creates a new instance of the middleware.
 
 =cut
 
@@ -101,6 +101,7 @@ sub new {
 
 	return $self;
 }
+
 
 =method call
 
@@ -115,7 +116,7 @@ sub call {
 	my $res = $self->app->($env);
 
 	unless ($self->looks_like_browser_request($env)) {
-		return $res
+		return $res;
 	}
 
 	return $self->response_cb($res, sub {
@@ -162,7 +163,7 @@ This method expects positional parameters.
 
 =item env
 
-The L<Plack> environment.
+The L<PSGI|PSGI> environment.
 
 =back
 

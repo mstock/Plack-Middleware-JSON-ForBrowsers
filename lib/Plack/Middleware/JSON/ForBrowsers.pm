@@ -1,5 +1,5 @@
 package Plack::Middleware::JSON::ForBrowsers;
-use base qw(Plack::Middleware);
+use parent qw(Plack::Middleware);
 
 # ABSTRACT: Plack middleware which turns application/json responses into HTML
 

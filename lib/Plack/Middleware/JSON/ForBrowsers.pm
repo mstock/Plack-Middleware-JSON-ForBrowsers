@@ -1,4 +1,7 @@
 package Plack::Middleware::JSON::ForBrowsers;
+{
+  $Plack::Middleware::JSON::ForBrowsers::VERSION = '0.001000';
+}
 use parent qw(Plack::Middleware);
 
 # ABSTRACT: Plack middleware which turns application/json responses into HTML
@@ -13,45 +16,6 @@ use List::MoreUtils qw(any);
 use Encode;
 use HTML::Entities qw(encode_entities_numeric);
 
-=head1 SYNOPSIS
-
-Basic Usage:
-
-	use Plack::Builder;
-
-	builder {
-		enable 'JSON::ForBrowsers';
-		$app;
-	};
-
-Combined with L<Plack::Middleware::Debug|Plack::Middleware::Debug>:
-
-	use Plack::Builder;
-
-	builder {
-		enable 'Debug';
-		enable 'JSON::ForBrowsers';
-		$app;
-	};
-
-=head1 DESCRIPTION
-
-Plack::Middleware::JSON::ForBrowsers turns C<application/json> responses
-into HTML that can be displayed in the web browser. This is primarily intended
-as a development tool, especially for use with
-L<Plack::Middleware::Debug|Plack::Middleware::Debug>.
-
-The middleware checks the request for the C<X-Requested-With> header - if it
-does not exist or its value is not C<XMLHttpRequest> and the C<Accept> header
-indicates that HTML is acceptable, it will wrap the JSON from an C<application/json>
-response with HTML and adapt the content type accordingly.
-
-This behaviour should not break clients which expect JSON, as they still I<do>
-get JSON. But when the same URI is requested with a web browser, HTML-wrapped
-and pretty-printed JSON will be returned, which can be displayed without external
-programs or special extensions.
-
-=cut
 
 chomp(my $html_head = <<'EOHTML');
 <?xml version="1.0"?>
@@ -87,11 +51,6 @@ my @json_types = qw(application/json);
 my @html_types = qw(text/html application/xhtml+xml);
 
 
-=method new
-
-Constructor, creates a new instance of the middleware.
-
-=cut
 
 sub new {
 	my ($class, $arg_ref) = @_;
@@ -103,12 +62,6 @@ sub new {
 }
 
 
-=method call
-
-Specialized C<call> method. Expects the response body to contain a UTF-8 encoded
-byte string.
-
-=cut
 
 sub call {
 	my($self, $env) = @_;
@@ -150,7 +103,105 @@ sub call {
 }
 
 
-=method looks_like_browser_request
+
+sub looks_like_browser_request {
+	my ($self, $env) = @_;
+
+	if (defined $env->{HTTP_X_REQUESTED_WITH}
+			&& $env->{HTTP_X_REQUESTED_WITH} eq 'XMLHttpRequest') {
+		return 0;
+	}
+
+	if (defined $env->{HTTP_ACCEPT}
+			&& any { index($env->{HTTP_ACCEPT}, $_) >= 0 } @html_types) {
+		return 1;
+	}
+
+	return 0;
+}
+
+
+
+sub json_to_html {
+	my ($self, $json) = @_;
+
+	my $pretty_json_string = decode(
+		'UTF-8',
+		$self->json()->encode(
+			$self->json()->decode($json)
+		)
+	);
+	return encode(
+		'UTF-8',
+		$html_head.encode_entities_numeric($pretty_json_string).$html_foot
+	);
+}
+
+
+1;
+
+
+__END__
+=pod
+
+=head1 NAME
+
+Plack::Middleware::JSON::ForBrowsers - Plack middleware which turns application/json responses into HTML
+
+=head1 VERSION
+
+version 0.001000
+
+=head1 SYNOPSIS
+
+Basic Usage:
+
+	use Plack::Builder;
+
+	builder {
+		enable 'JSON::ForBrowsers';
+		$app;
+	};
+
+Combined with L<Plack::Middleware::Debug|Plack::Middleware::Debug>:
+
+	use Plack::Builder;
+
+	builder {
+		enable 'Debug';
+		enable 'JSON::ForBrowsers';
+		$app;
+	};
+
+=head1 DESCRIPTION
+
+Plack::Middleware::JSON::ForBrowsers turns C<application/json> responses
+into HTML that can be displayed in the web browser. This is primarily intended
+as a development tool, especially for use with
+L<Plack::Middleware::Debug|Plack::Middleware::Debug>.
+
+The middleware checks the request for the C<X-Requested-With> header - if it
+does not exist or its value is not C<XMLHttpRequest> and the C<Accept> header
+indicates that HTML is acceptable, it will wrap the JSON from an C<application/json>
+response with HTML and adapt the content type accordingly.
+
+This behaviour should not break clients which expect JSON, as they still I<do>
+get JSON. But when the same URI is requested with a web browser, HTML-wrapped
+and pretty-printed JSON will be returned, which can be displayed without external
+programs or special extensions.
+
+=head1 METHODS
+
+=head2 new
+
+Constructor, creates a new instance of the middleware.
+
+=head2 call
+
+Specialized C<call> method. Expects the response body to contain a UTF-8 encoded
+byte string.
+
+=head2 looks_like_browser_request
 
 Tries to decide if a request is coming from a web browser. Uses the C<Accept>
 and C<X-Requested-With> headers for this decision.
@@ -171,26 +222,7 @@ The L<PSGI|PSGI> environment.
 
 C<1> if it looks like the request came from a browser, C<0> otherwise.
 
-=cut
-
-sub looks_like_browser_request {
-	my ($self, $env) = @_;
-
-	if (defined $env->{HTTP_X_REQUESTED_WITH}
-			&& $env->{HTTP_X_REQUESTED_WITH} eq 'XMLHttpRequest') {
-		return 0;
-	}
-
-	if (defined $env->{HTTP_ACCEPT}
-			&& any { index($env->{HTTP_ACCEPT}, $_) >= 0 } @html_types) {
-		return 1;
-	}
-
-	return 0;
-}
-
-
-=method json_to_html
+=head2 json_to_html
 
 Takes a UTF-8 encoded JSON byte string as input and turns it into a UTF-8
 encoded HTML byte string, with HTML entity encoded characters to avoid XSS.
@@ -211,26 +243,6 @@ The JSON byte string.
 
 The JSON wrapped in HTML.
 
-=cut
-
-sub json_to_html {
-	my ($self, $json) = @_;
-
-	my $pretty_json_string = decode(
-		'UTF-8',
-		$self->json()->encode(
-			$self->json()->decode($json)
-		)
-	);
-	return encode(
-		'UTF-8',
-		$html_head.encode_entities_numeric($pretty_json_string).$html_foot
-	);
-}
-
-
-1;
-
 =head1 SEE ALSO
 
 =over
@@ -245,4 +257,16 @@ L<Plack::Middleware::Debug|Plack::Middleware::Debug>
 
 =back
 
+=head1 AUTHOR
+
+Manfred Stock <mstock@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2012 by Manfred Stock.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
 =cut
+

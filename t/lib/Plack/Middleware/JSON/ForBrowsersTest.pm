@@ -1,5 +1,5 @@
 package Plack::Middleware::JSON::ForBrowsersTest;
-use base qw(Test::Class);
+use parent qw(Test::Class);
 
 use strict;
 use warnings;

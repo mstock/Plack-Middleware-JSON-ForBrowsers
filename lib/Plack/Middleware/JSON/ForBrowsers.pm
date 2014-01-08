@@ -34,6 +34,18 @@ Combined with L<Plack::Middleware::Debug|Plack::Middleware::Debug>:
 		$app;
 	};
 
+Custom HTML head and foot:
+
+	use Plack::Builder;
+
+	builder {
+		enable 'JSON::ForBrowsers' => (
+			html_head => '<pre><code>',
+			html_foot => '</code></pre>',
+		);
+		mount '/'  => $json_app;
+	};
+
 =head1 DESCRIPTION
 
 Plack::Middleware::JSON::ForBrowsers turns C<application/json> responses
@@ -90,6 +102,22 @@ my @html_types = qw(text/html application/xhtml+xml);
 =method new
 
 Constructor, creates a new instance of the middleware.
+
+=head3 Parameters
+
+This method expects its parameters as a hash or hash reference.
+
+=over
+
+=item html_head
+
+String that will be prefixed to the prettified JSON instead of the default.
+
+=item html_foot
+
+String that will be appended to the prettified JSON instead of the default.
+
+=back
 
 =cut
 

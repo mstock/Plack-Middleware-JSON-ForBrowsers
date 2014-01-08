@@ -8,7 +8,7 @@ use warnings;
 use Carp;
 use JSON;
 use MRO::Compat;
-use Plack::Util::Accessor qw(json);
+use Plack::Util::Accessor qw(json html_head html_foot);
 use List::MoreUtils qw(any);
 use Encode;
 use HTML::Entities qw(encode_entities_numeric);
@@ -98,6 +98,13 @@ sub new {
 
 	my $self = $class->next::method($arg_ref);
 	$self->json(JSON->new()->utf8()->pretty());
+
+	unless (defined $self->html_head()) {
+		$self->html_head($html_head);
+	}
+	unless (defined $self->html_foot()) {
+		$self->html_foot($html_foot);
+	}
 
 	return $self;
 }
@@ -222,9 +229,12 @@ sub json_to_html {
 			$self->json()->decode($json)
 		)
 	);
+	chomp $pretty_json_string;
 	return encode(
 		'UTF-8',
-		$html_head.encode_entities_numeric($pretty_json_string).$html_foot
+		$self->html_head()
+			. encode_entities_numeric($pretty_json_string) .
+		$self->html_foot()
 	);
 }
 

@@ -91,7 +91,7 @@ sub json_to_html_test : Test(5) {
 }
 
 
-sub custom_html_head_and_foot_test : Test(5) {
+sub custom_html_head_and_foot_test : Test(6) {
 	my ($self) = @_;
 
 	my $mw = Plack::Middleware::JSON::ForBrowsers->new({
@@ -119,6 +119,13 @@ sub custom_html_head_and_foot_test : Test(5) {
 	});
 	$html = $mw->json_to_html('{}');
 	like($html, qr{<code>\{\}foot}, 'custom html foot');
+
+	$mw = Plack::Middleware::JSON::ForBrowsers->new({
+		html_head => "\x{263a}",
+		html_foot => "\x{263b}",
+	});
+	$html = $mw->json_to_html('{}');
+	is($html, encode('UTF-8', "\x{263a}{}\x{263b}"), 'UTF-8 in head and foot');
 }
 
 

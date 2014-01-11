@@ -111,11 +111,13 @@ This method expects its parameters as a hash or hash reference.
 
 =item html_head
 
-String that will be prefixed to the prettified JSON instead of the default.
+String that will be prefixed to the prettified JSON instead of the default HTML
+head. If passed, it must be a UTF-8-encoded character string.
 
 =item html_foot
 
-String that will be appended to the prettified JSON instead of the default.
+String that will be appended to the prettified JSON instead of the default HTML
+foot. If passed, it must be a UTF-8-encoded character string.
 
 =back
 

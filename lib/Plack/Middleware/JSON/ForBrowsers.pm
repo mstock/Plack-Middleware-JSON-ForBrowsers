@@ -8,7 +8,7 @@ use warnings;
 use Carp;
 use JSON;
 use MRO::Compat;
-use Plack::Util::Accessor qw(json);
+use Plack::Util::Accessor qw(json html_head html_foot);
 use List::MoreUtils qw(any);
 use Encode;
 use HTML::Entities qw(encode_entities_numeric);
@@ -32,6 +32,18 @@ Combined with L<Plack::Middleware::Debug|Plack::Middleware::Debug>:
 		enable 'Debug';
 		enable 'JSON::ForBrowsers';
 		$app;
+	};
+
+Custom HTML head and foot:
+
+	use Plack::Builder;
+
+	builder {
+		enable 'JSON::ForBrowsers' => (
+			html_head => '<pre><code>',
+			html_foot => '</code></pre>',
+		);
+		mount '/'  => $json_app;
 	};
 
 =head1 DESCRIPTION
@@ -91,6 +103,24 @@ my @html_types = qw(text/html application/xhtml+xml);
 
 Constructor, creates a new instance of the middleware.
 
+=head3 Parameters
+
+This method expects its parameters as a hash or hash reference.
+
+=over
+
+=item html_head
+
+String that will be prefixed to the prettified JSON instead of the default HTML
+head. If passed, it must be a UTF-8-encoded character string.
+
+=item html_foot
+
+String that will be appended to the prettified JSON instead of the default HTML
+foot. If passed, it must be a UTF-8-encoded character string.
+
+=back
+
 =cut
 
 sub new {
@@ -98,6 +128,13 @@ sub new {
 
 	my $self = $class->next::method($arg_ref);
 	$self->json(JSON->new()->utf8()->pretty());
+
+	unless (defined $self->html_head()) {
+		$self->html_head($html_head);
+	}
+	unless (defined $self->html_foot()) {
+		$self->html_foot($html_foot);
+	}
 
 	return $self;
 }
@@ -222,9 +259,12 @@ sub json_to_html {
 			$self->json()->decode($json)
 		)
 	);
+	chomp $pretty_json_string;
 	return encode(
 		'UTF-8',
-		$html_head.encode_entities_numeric($pretty_json_string).$html_foot
+		$self->html_head()
+			. encode_entities_numeric($pretty_json_string) .
+		$self->html_foot()
 	);
 }
 

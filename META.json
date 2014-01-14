@@ -4,7 +4,7 @@
       "Manfred Stock <mstock@cpan.org>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Dist::Zilla version 4.300006, CPAN::Meta::Converter version 2.113640",
+   "generated_by" : "Dist::Zilla version 4.300020, CPAN::Meta::Converter version 2.120921",
    "license" : [
       "perl_5"
    ],
@@ -31,28 +31,28 @@
       },
       "runtime" : {
          "requires" : {
-            "Carp" : 0,
-            "Encode" : 0,
-            "HTML::Entities" : 0,
-            "JSON" : 0,
-            "List::MoreUtils" : 0,
-            "MRO::Compat" : 0,
-            "Plack::Middleware" : 0,
-            "Plack::Util::Accessor" : 0,
-            "parent" : 0,
-            "strict" : 0,
-            "warnings" : 0
+            "Carp" : "0",
+            "Encode" : "0",
+            "HTML::Entities" : "0",
+            "JSON" : "0",
+            "List::MoreUtils" : "0",
+            "MRO::Compat" : "0",
+            "Plack::Middleware" : "0",
+            "Plack::Util::Accessor" : "0",
+            "parent" : "0",
+            "strict" : "0",
+            "warnings" : "0"
          }
       },
       "test" : {
          "requires" : {
-            "English" : 0,
-            "HTTP::Request::Common" : 0,
-            "Plack::Test" : 0,
-            "Plack::Util" : 0,
-            "Test::Class" : 0,
-            "Test::More" : 0,
-            "base" : 0
+            "File::Find" : "0",
+            "File::Temp" : "0",
+            "HTTP::Request::Common" : "0",
+            "Plack::Test" : "0",
+            "Plack::Util" : "0",
+            "Test::Class" : "0",
+            "Test::More" : "0"
          }
       }
    },
@@ -64,6 +64,6 @@
          "web" : "https://github.com/mstock/Plack-Middleware-JSON-ForBrowsers"
       }
    },
-   "version" : "0.001000"
+   "version" : "0.002000"
 }
 

@@ -12,14 +12,10 @@ my $json_app = sub { return [
 	[ encode('UTF-8', "{\"foo\":\"bar, \x{263a}, \x{fc}\",\"<h1>baz</h1>\":2}") ]
 ] };
 
-my $other_app = sub { return [
-	200,
-	[ 'Content-Type' => 'text/plain' ],
-	[ 'Hello, world!' ]
-] };
-
 my $app = builder {
-	enable 'JSON::ForBrowsers';
-	mount '/json'  => $json_app;
-	mount '/other' => $other_app;
+	enable 'JSON::ForBrowsers' => (
+		html_head => '<pre><code>',
+		html_foot => '</code></pre>',
+	);
+	mount '/'  => $json_app;
 };

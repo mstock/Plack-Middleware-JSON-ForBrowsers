@@ -1,5 +1,5 @@
 package Plack::Middleware::JSON::ForBrowsersTest;
-use base qw(Test::Class);
+use parent qw(Test::Class);
 
 use strict;
 use warnings;
@@ -89,5 +89,44 @@ sub json_to_html_test : Test(5) {
 	like($html, qr{&#x3C;}, 'LESS-THAN SIGN encoded');
 	like($html, qr{&#x3E;}, 'GREATER-THAN SIGN encoded');
 }
+
+
+sub custom_html_head_and_foot_test : Test(6) {
+	my ($self) = @_;
+
+	my $mw = Plack::Middleware::JSON::ForBrowsers->new({
+		html_head => '',
+		html_foot => '',
+	});
+	my $html = $mw->json_to_html('{}');
+	is($html, "{}", 'empty head and foot appended');
+
+	$mw = Plack::Middleware::JSON::ForBrowsers->new({
+		html_head => 'head',
+		html_foot => 'foot',
+	});
+	$html = $mw->json_to_html('{}');
+	is($html, "head{}foot", 'no head or foot appended');
+
+	$mw = Plack::Middleware::JSON::ForBrowsers->new({
+		html_head => 'head',
+	});
+	$html = $mw->json_to_html('{}');
+	like($html, qr{head\{\}</code>}, 'custom html head');
+
+	$mw = Plack::Middleware::JSON::ForBrowsers->new({
+		html_foot => 'foot',
+	});
+	$html = $mw->json_to_html('{}');
+	like($html, qr{<code>\{\}foot}, 'custom html foot');
+
+	$mw = Plack::Middleware::JSON::ForBrowsers->new({
+		html_head => "\x{263a}",
+		html_foot => "\x{263b}",
+	});
+	$html = $mw->json_to_html('{}');
+	is($html, encode('UTF-8', "\x{263a}{}\x{263b}"), 'UTF-8 in head and foot');
+}
+
 
 1;
